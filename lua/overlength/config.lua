@@ -23,7 +23,7 @@ local default_opts = {
   --    textwidth == 0, unless added explicitly
   textwidth_mode = 2,
   -- Default overlength with no filetype
-  default_overlength = 80,
+  default_overlength = 0,
   -- How many spaces past your overlength to start highlighting
   grace_length = 1,
   -- Highlight only the column or until the end of the line
@@ -31,6 +31,9 @@ local default_opts = {
 
   -- List of filetypes to disable overlength highlighting
   disable_ft = { 'qf', 'help', 'man', 'checkhealth', 'lazy', 'packer', 'NvimTree', 'Telescope', 'TelescopePrompt', 'TelescopeResults', 'WhichKey' },
+
+  -- List of filetypes to enable
+  enable_ft = { 'go', 'dart', 'rust' }
 }
 
 local M = {}
@@ -52,6 +55,11 @@ local function validate(opts)
 
   if (opts['disable_ft'] ~= nil) and (type(opts['disable_ft']) ~= 'table') then
     vim.api.nvim_err_writeln('Error: overlength/config - opts["disable_ft"] is not a table')
+    return false
+  end
+
+  if (opts['enable_ft'] ~= nil) and (type(opts['enable_ft']) ~= 'table') then
+    vim.api.nvim_err_writeln('Error: overlength/config - opts["enable_ft"] is not a table')
     return false
   end
 
@@ -82,6 +90,12 @@ function M.parse(opts)
   config.ft_specific_length = {}
   for _, v in ipairs(config.disable_ft) do
     config.ft_specific_length[v] = 0
+  end
+
+  -- Enabled filetypes
+  config.ft_specific_length = {}
+  for _, v in ipairs(config.enable_ft) do
+    config.ft_specific_length[v] = config.default_overlength
   end
 
   return config
